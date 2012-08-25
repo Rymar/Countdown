@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>New page</title>
+        <meta charset="utf-8">
+        <!-- <link rel="stylesheet" href="style.css"> -->
+
+        <style>
+
+        .orange{
+            color: orange;
+        }
+
+        .red{
+            color: red;
+        }
+
+        .blue{
+            color: blue;
+        }
+
+        </style>
+    </head>
+    <body>
+
+        <div id="countdown1"></div>
+        <div id="countdown2"></div>
+        <div id="countdown3"></div>
+
+        <script src="countdown.js"></script>
+        <script type="text/javascript">
+
+        var t = document.getElementById('countdown');
+
+        var count1 = new Countdown({
+
+            mode : 'timer',
+            nodeId : 'countdown1',
+            limit : 80000,
+            precision : 10,
+            pattern : '<span class="blue">Pozostało</span> <span class="orange">%MM</span>:<span class="red">%SS</span> %UU',
+            onEnd : function(ob){
+                console.log('THE END madafaka!!');;
+            },
+            onStart : function(ob){
+
+            },
+            
+            
+        });
+
+        var count2 = new Countdown({
+
+            mode : 'date',
+            nodeId : 'countdown2',
+            precision : 10,
+            endDate : new Date(2013, 12, 10, 14, 0, 24)
+            
+        });
+
+        var count3 = new Countdown({
+
+            mode : 'date',
+            nodeId : 'countdown3',
+            startDate : new Date(2012, 12, 10, 14, 0 ,24),
+            endDate : new Date(2013, 12, 10, 14, 0, 24)
+        });
+
+        count1.start();
+        //count2.start();
+        //count3.start();
+
+        </script>
+    </body>
+</html>
