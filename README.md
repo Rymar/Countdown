@@ -3,7 +3,7 @@ It's a simple countdown class in JavaScript. What you can do with it? Basically 
 ### Creating object:
 
 - 'timer' mode:
-        ```javascript
+```javascript       
         var settings = {
             mode : 'timer', //required!!
             limit : number, //time limit in ms, required!!
@@ -32,18 +32,18 @@ It's a simple countdown class in JavaScript. What you can do with it? Basically 
         };
 
         var ob = new Countdown(settings);
-        ```
+```
+   
 
 - 'date' mode:
-
-        ```javascript
-        var settings = {
-            mode : 'date',
-            startDate : , //Date object, default new Date(),
-            endDate : , //Date object required!!, 
-            ...
-        };
-        ```
+```javascript
+    var settings = {
+        mode : 'date',
+        startDate : , //Date object, default new Date(),
+        endDate : , //Date object required!!, 
+        ...
+    };
+```
 
 There is no type checking so be careful with types.
 
