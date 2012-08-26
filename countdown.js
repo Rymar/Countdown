@@ -1,30 +1,32 @@
-window.addEventListener('DOMContentLoaded', function () {
 
-}, false);
+/**
+ * @author Mariusz Rymarczyk
+ * @license MIT
+ * @version 0.1
+ */
+
+'use strict';
 
 var Countdown = (function () {
-
-    //static private
 
     /**
      * Adding preceding zeros
      * @param val int 
      * @param n int ciphers in number
      */
-    var fullFormat = function(val, n){
+    var fullFormat = function (val, n) {
 
         var len = ('' + val).length,
             zeros = n - len,
-            tmp = '';
+            tmp = '',
+            i = 0;
 
-        //mozna zaczac od drugiej cyfry bo pierwsza zawsze bedzie
-        for(var i = 0 ; i < zeros ; i++){
+        for ( ; i < zeros ; i++) {
             tmp += '0';
         }
 
         return tmp + val;
     };
-    //zmienne prywatne statyczne
 
     var Countdown = function (settings) {
 
@@ -41,9 +43,9 @@ var Countdown = (function () {
             /* miliseconds left */
             miliseconds,
             /* start date Object */
-            start,
+            startDate,
             /* end date Object */
-            end,
+            endDate,
             /* how the date will be showed on page */
             pattern = '%D days %HH hours %MM minutes %SS seconds %UU miliseconds',
             /* mode of countdown: 'date' or 'timer' */ /*REQUIRED!!*/
@@ -52,8 +54,6 @@ var Countdown = (function () {
             node, 
             /* in seconds or miliseconds, depends on settings */
             timeLeft = null,
-            /* current state */
-            paused = false,
             /* iteration var */
             i = 0,
             /* required settings */
@@ -61,20 +61,20 @@ var Countdown = (function () {
             /* time limit for timer mode */
             limit = 0,
             /* step of interval */
-            precision = 10,
+            refreshRate = 10,
             /* speed ratio*/
             speed = 1,
             /* state */
-            state = null,
+            state = 'init',
+            /* inactiveTab */
+            inactiveTab,
             /* date before changing tab */
             before;
 
-
-        /* initialization */
         required = settings.mode === 'date' ? ['mode', 'endDate', 'nodeId'] : ['mode', 'limit', 'nodeId'];
 
         /* check required fields */
-        for (; i < required.length ; i++) {
+        for ( ; i < required.length ; i++) {
 
             if (!(required[i] in settings)) {
 
@@ -83,11 +83,15 @@ var Countdown = (function () {
             }
         }
 
+        /* initialization */
+
         mode = settings.mode;
+
+        inactiveTab = settings.inactiveTab || true;
 
         speed = settings.speed || 1;
 
-        precision = ((settings.precision && settings.precision < 10) ? 10 : settings.precision) || 100;
+        refreshRate = ((settings.refreshRate && settings.refreshRate < 10) ? 10 : settings.refreshRate) || 100;
 
         pattern = settings.pattern || pattern;
         
@@ -97,13 +101,12 @@ var Countdown = (function () {
         
         node = document.getElementById(settings.nodeId);
 
-
         /* methods */
-        var getId = function () { 
+        var getTimerId = function () { 
                 return timerId; 
             },
 
-            getLeftTime = function () {
+            getTime = function () {
 
                 return {
                     days : days,
@@ -115,23 +118,31 @@ var Countdown = (function () {
 
             },
 
-            setSpeed = function(val){
+            getState = function () {
+                return state;
+            },
+
+            setSpeed = function (val) {
                 speed = val;
             },
 
+            /**
+             * Executed by setInterval
+             * @param timeStep number not required
+             */
             tick = function (timeStep) {
 
-                var elapsedTime = new Date() - before,
-                    tStep = typeof timeStep !== 'undefined' ? timeStep : precision;
+                var elapsedTime = +new Date() - before,
+                    tStep = typeof timeStep !== 'undefined' ? timeStep : refreshRate;
 
                 //fixing inactive tab time
-                if(elapsedTime > tStep){
+                if (inactiveTab && (elapsedTime > tStep + 10) ) {
                     timeLeft -= elapsedTime * speed;
                 } else {
                     timeLeft -= tStep * speed; 
                 }
 
-                if(timeLeft <= 0){
+                if(timeLeft <= 0) {
                     end();
                     return;
                 }
@@ -159,18 +170,18 @@ var Countdown = (function () {
                         timeLeft = limit;
                     }
                 }
-before = new Date();
-                if(state === null){
+
+                before = new Date();
+
+                if(state === 'init'){
                     tick(0);
-                    state = 'started';
                 }
 
-                
+                state = 'started';
 
                 timerId = setInterval(function(){
-                    tick(precision);
-                }, precision);
-
+                    tick(refreshRate);
+                }, refreshRate);
 
                 settings.onStart && settings.onStart(ret);
 
@@ -178,7 +189,8 @@ before = new Date();
                     end();
                 }
             },
-            count = function(){
+
+            count = function () {
 
                 miliseconds = (timeLeft%1000)/10 | 0;
                 seconds = ((timeLeft/1000) | 0) % 60;
@@ -187,7 +199,8 @@ before = new Date();
                 days = (timeLeft/86400000) | 0;
 
             },
-            show = function(){
+
+            show = function () {
                 
                 var content = pattern;
 
@@ -208,28 +221,34 @@ before = new Date();
             /* stop counting */
             stop = function () {
                 clearInterval(timerId);
+                state = 'stopped';
                 settings.onStop && settings.onStop(ret);
             },
 
             /* end */
-            end = function(){
+            end = function () {
                 days = hours = minutes = seconds = miliseconds = 0;
                 show();
                 clearInterval(timerId);
+                state = 'ended';
                 settings.onEnd && settings.onEnd(ret);
             },
+
             /* reset exists only for timer mode, reset to original time */
             reset = function () {
+                state = null;
                 timeLeft = limit;
                 count();
                 show();
+                stop();
                 settings.onReset && settings.onReset(ret);
             };
 
         /* public methods & properties */
         var ret = {
-            getId : getId,
-            getLeftTime : getLeftTime,
+            getTimerId : getTimerId,
+            getTime : getTime,
+            getState : getState,
             start : start,
             stop : stop,
             setSpeed : setSpeed
@@ -247,57 +266,3 @@ before = new Date();
     };
 
 })();
-
-/*
-
-speed ?
-
-
-There is no type checking
-
-var settings = {
-    mode : 'date',
-    endDate : , //required
-    pattern : , //default "{%DD days %HH hours %MM minutes %SS seconds}"
-                //%DD %HH %MM %SS preceded by zero
-    nodeId : , //html id node required
-    onStop : , //user events
-    onReset : ,
-    onStart : ,
-    onTick : ,
-    onEnd :,
-    step : //default 1s
-};
-
-do eventow mozna dodac jako pierwszy argument parametr this moze komus sie przyda
-
-//zrobic druga wersje tego samego na prototype i nie dawac return tylko wszystkie pola musza byc publiczne lub wiekszosc i poprzedzic
-//je _ zeby mozna bylo latwo odroznic je od siebie
-
-//na odrebnej galezi
-
-var settings = {
-    mode : 'timer',
-    limit : ,// ms
-    pattern : ,//
-    nodeId : //
-    onStop : , //user events
-    onReset : ,
-    onStart : ,
-    onTick : ,
-    onEnd :
-};
-
-*/
-
-//inactiveTab
-
-//dodac prototype ? zastanowic sie nad funkcjami wspolnymi
-
-/**
- * There are two modes:
- * - date, which counts from now to 'dateTo' date
- * - timer, which counts from 'start' time to 0
- */
-
-//reset, przy statusie zatrzymany powinno ladnie odswiezyc widok
