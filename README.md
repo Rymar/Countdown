@@ -1,7 +1,6 @@
 It's a simple countdown class in JavaScript. What you can do with it? Basically there are two modes 'date' and 'timer'. First one will measure time between dates, second one, will measure time from some value in miliseconds to zero.
 
 ### Creating object:
-
 - 'timer' mode:
 ```javascript       
         var settings = {
@@ -68,3 +67,6 @@ There is no type checking so be careful with types.
 - stop()
 - reset() //avaiable only for 'timer' mode
 - setSpeed(number) //you can adjust speed, make it faster or slower
+ 
+### Example:
+http://jsfiddle.net/Rymar/H8fxU/
