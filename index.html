@@ -2,73 +2,205 @@
 <html lang="en">
     <head>
         <title>New page</title>
+        <script src="http://ajax.googleapis.com/ajax/libs/dojo/1.8.0/dojo/dojo.js"></script>
         <meta charset="utf-8">
-        <!-- <link rel="stylesheet" href="style.css"> -->
-
         <style>
 
-        .orange{
-            color: orange;
-        }
+            body {
+                background: #2F3029;
+                color: #EEE;
+                font-family: Helvetica, Arial, sans-serif;
+                font-size: 12px;
+                margin: 0 5px;
+            }
 
-        .red{
-            color: red;
-        }
+            button { 
+                cursor: pointer;
+                min-width: 100px;
+            }
 
-        .blue{
-            color: blue;
-        }
+            .endOfYear {
+                background: #62A237;
+                border: 1px solid #333;
+                text-shadow: 1px 1px 1px #666;
+            }
+
+            .timer {
+                background: #B11D07;
+                border: 1px solid #333;
+                text-shadow: 1px 1px 1px #111;
+            }
+
+            .box {
+
+                padding: 10px;
+                border-radius: 10px;
+                width: 300px;
+                float: left;
+                border: 1px solid #333;
+                font-weight: bold;
+            }
+
+            .example{
+                overflow: hidden;
+                border-bottom: 1px dashed #555;
+                padding: 10px 0;
+            }
+
+            .bt {
+                border-radius: 10px;
+                background: #1F201C;
+                font-size: 12px;
+                float: left;
+                padding: 10px;
+                border: 1px solid #1B1B1B;
+                color: #eee;
+                margin: 0 0 0 4px;
+                outline: none;
+            }
+
+            .arrowsBox {
+                float: left;
+            }
+
+            .arrows {
+                padding: 0 5px;
+                display: block;
+                float: none;
+                margin-top: 1px;
+            }
+
+            .speed {
+                float: left;
+                padding: 10px;
+            }
 
         </style>
     </head>
     <body>
 
-        <div id="countdown1"></div>
-        <div id="countdown2"></div>
-        <div id="countdown3"></div>
+        <div class="example">
+            <div class="box timer" id="c1">Press start</div>
+            <button id="c1start" class="bt">START</button>
+            <button id="c1reset" class="bt">RESET</button>
+        </div>
+
+        <div class="example">
+            <div class="box endOfYear" id="c2">Press start</div>
+            <button id="c2start" class="bt">START</button>
+            <div class="arrowsBox">
+                <button id="up" class="bt arrows">&#x25B2;</button>
+                <button id="down" class="bt arrows">&#x25BC;</button>
+            </div>
+            <div class="speed">Speed: x<span id="speed">1</span></div>
+        </div>
 
         <script src="countdown.js"></script>
+
         <script type="text/javascript">
 
-        var t = document.getElementById('countdown');
-
-        var count1 = new Countdown({
+        var cOb1 = new Countdown({
 
             mode : 'timer',
-            nodeId : 'countdown1',
-            limit : 80000,
-            precision : 10,
-            pattern : '<span class="blue">Pozostało</span> <span class="orange">%MM</span>:<span class="red">%SS</span> %UU',
-            onEnd : function(ob){
-                console.log('THE END madafaka!!');;
+            nodeId : 'c1',
+            limit : 10000,
+            refreshRate : 10,
+            pattern : 'You have %MM:%SS.%UU to do something.',
+            onEnd : function (ob) {
+                dojo.byId(this.nodeId).innerHTML = 'Time out, sry';
             },
-            onStart : function(ob){
-
+            onStart : function (ob) {
+                var bt = dojo.byId('c1start');
+                bt.innerHTML = 'STOP';
             },
-            
+            onStop : function (ob) {
+                var bt = dojo.byId('c1start');
+                bt.innerHTML = 'START';
+            }
             
         });
 
-        var count2 = new Countdown({
+        var cOb2 = new Countdown({
 
             mode : 'date',
-            nodeId : 'countdown2',
-            precision : 10,
-            endDate : new Date(2013, 12, 10, 14, 0, 24)
+            nodeId : 'c2',
+            pattern : 'End of year in %D days and %HH:%MM:%SS',
+            endDate : new Date(2013, 0, 1),
+            onStart : function (ob) {
+                ob.setSpeed(speed);
+                var bt = dojo.byId('c2start');
+                bt.innerHTML = 'STOP';
+            },
+            onStop : function (ob) {
+                var bt = dojo.byId('c2start');
+                bt.innerHTML = 'START';
+            },
+            onEnd : function (ob) {
+                var bt = dojo.byId('c2start');
+                bt.innerHTML = 'FINISH';
+                dojo.byId(this.nodeId).innerHTML = 'Happy new Year!!';
+            }
             
         });
 
-        var count3 = new Countdown({
+        var speed = 1;
 
-            mode : 'date',
-            nodeId : 'countdown3',
-            startDate : new Date(2012, 12, 10, 14, 0 ,24),
-            endDate : new Date(2013, 12, 10, 14, 0, 24)
-        });
+        require(["dojo/ready", "dojo/on"], function(ready, on){
 
-        count1.start();
-        //count2.start();
-        //count3.start();
+            ready(function(){
+
+                var c1 = dojo.byId('c1start'),
+                    c1r = dojo.byId('c1reset'),
+                    c2 = dojo.byId('c2start');
+
+                on(c1, 'click', function(){
+
+                    var state = cOb1.getState();
+
+                    if(state === 'started') {
+                        cOb1.stop();
+                    } else if(state == 'stopped' || state == 'init'){
+                        cOb1.start();
+                    }
+                });
+
+                on(c1r, 'click', function () {
+                    cOb1.reset();
+                });
+
+                on(c2, 'click', function(){
+
+                    var state = cOb2.getState();
+
+                    if(state === 'started') {
+                        cOb2.stop();
+                    } else if(state == 'stopped' || state == 'init'){
+                        cOb2.start();
+                    }
+
+                });
+
+                on(dojo.byId('up'), 'click', function(){
+
+                    var state = cOb2.getState();
+
+                    speed *= 2;
+
+                    dojo.byId('speed').innerHTML = speed;
+                    cOb2.setSpeed(speed);
+                });
+
+                on(dojo.byId('down'), 'click', function(){
+
+                    var state = cOb2.getState();
+
+                    speed /= 2;
+
+                    dojo.byId('speed').innerHTML = speed;
+                    cOb2.setSpeed(speed);
+                });
+            });
+        })
 
         </script>
     </body>
