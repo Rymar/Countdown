@@ -30,46 +30,52 @@ var Countdown = (function () {
 
     var Countdown = function (settings) {
 
-        var /* setInterval id */
-            timerId,
-            /* days left */
-            days,
-            /* hours left */
-            hours,
-            /* minutes left */
-            minutes,
-            /* seconds left */
-            seconds,
-            /* miliseconds left */
-            miliseconds,
-            /* start date Object */
-            startDate,
-            /* end date Object */
-            endDate,
-            /* how the date will be showed on page */
-            pattern = '%D days %HH hours %MM minutes %SS seconds %UU miliseconds',
-            /* mode of countdown: 'date' or 'timer' */ /*REQUIRED!!*/
-            mode, 
-            /* element where remaining time will be placed */ /*REQUIRED!!*/
-            node, 
-            /* in seconds or miliseconds, depends on settings */
-            timeLeft = null,
-            /* iteration var */
+        /* pseudo private */
+
+        /* setInterval id */
+        this._timerId = 0;
+        /* days left */
+        this._days = 0;
+        /* hours left */
+        this._hours = 0;
+        /* minutes left */
+        this._minutes = 0;
+        /* seconds left */
+        this._seconds = 0;
+        /* miliseconds left */
+        this._miliseconds = 0;
+        /* start date Object */
+        this._startDate = null;
+        /* end date Object */
+        this._endDate = null;
+        /* how the date will be showed on page */
+        this._pattern = '%D days %HH hours %MM minutes %SS seconds %UU miliseconds';
+        /* mode of countdown: 'date' or 'timer' */ /*REQUIRED!!*/
+        this._mode = '';
+        /* element where remaining time will be placed */ /*REQUIRED!!*/
+        this._node = null;
+        /* in seconds or miliseconds, depends on settings */
+        this._timeLeft = null;
+        /* time limit for timer mode */
+        this._limit = 0;
+        /* step of interval */
+        this._refreshRate = 10;
+        /* speed ratio*/
+        this._speed = 1;
+        /* state */
+        this._state = 'init';
+        /* inactiveTab */
+        this._inactiveTab = true;
+        /* date before changing tab */
+        this._before = null;
+        /* initial settings */
+        this._settings = settings;
+
+        /* private */
+        var /* iteration var */
             i = 0,
             /* required settings */
-            required,
-            /* time limit for timer mode */
-            limit = 0,
-            /* step of interval */
-            refreshRate = 10,
-            /* speed ratio*/
-            speed = 1,
-            /* state */
-            state = 'init',
-            /* inactiveTab */
-            inactiveTab,
-            /* date before changing tab */
-            before;
+            required;
 
         required = settings.mode === 'date' ? ['mode', 'endDate', 'nodeId'] : ['mode', 'limit', 'nodeId'];
 
@@ -85,181 +91,186 @@ var Countdown = (function () {
 
         /* initialization */
 
-        mode = settings.mode;
+        this._mode = settings.mode;
 
-        inactiveTab = settings.inactiveTab || true;
+        this._inactiveTab = settings.inactiveTab || true;
 
-        speed = settings.speed || 1;
+        this._speed = settings.speed || 1;
 
-        refreshRate = ((settings.refreshRate && settings.refreshRate < 10) ? 10 : settings.refreshRate) || 100;
+        this._refreshRate = ((settings.refreshRate && settings.refreshRate < 10) ? 10 : settings.refreshRate) || 100;
 
-        pattern = settings.pattern || pattern;
+        this._pattern = settings.pattern || this._pattern;
         
-        limit = settings.limit;
+        this._limit = settings.limit;
 
-        endDate = settings.endDate;
+        this._endDate = settings.endDate;
         
-        node = document.getElementById(settings.nodeId);
+        this._node = document.getElementById(settings.nodeId);
 
-        /* methods */
-        var getTimerId = function () { 
-                return timerId; 
-            },
-
-            getTime = function () {
-
-                return {
-                    days : days,
-                    hours : hours,
-                    minutes : minutes,
-                    seconds : seconds,
-                    miliseconds : miliseconds
-                };
-
-            },
-
-            getState = function () {
-                return state;
-            },
-
-            setSpeed = function (val) {
-                speed = val;
-            },
-
-            /**
-             * Executed by setInterval
-             * @param timeStep number not required
-             */
-            tick = function (timeStep) {
-
-                var elapsedTime = +new Date() - before,
-                    tStep = typeof timeStep !== 'undefined' ? timeStep : refreshRate;
-
-                //fixing inactive tab time
-                if (inactiveTab && (elapsedTime > tStep + 10) ) {
-                    timeLeft -= elapsedTime * speed;
-                } else {
-                    timeLeft -= tStep * speed; 
-                }
-
-                if(timeLeft <= 0) {
-                    end();
-                    return;
-                }
-
-                count();
-                show();
-                
-                settings.onTick && settings.onTick(ret);
-               
-                before = new Date();
-            },
-
-            /* start counting */
-            start = function () {
-
-                if (mode === 'date') {
-
-                    startDate = settings.startDate || new Date();
-
-                    timeLeft = endDate - startDate;
-
-                } else if (mode === 'timer') {
-
-                    if (timeLeft === null) {
-                        timeLeft = limit;
-                    }
-                }
-
-                before = new Date();
-
-                if(state === 'init'){
-                    tick(0);
-                }
-
-                state = 'started';
-
-                timerId = setInterval(function(){
-                    tick(refreshRate);
-                }, refreshRate);
-
-                settings.onStart && settings.onStart(ret);
-
-                if(timeLeft <= 0){
-                    end();
-                }
-            },
-
-            count = function () {
-
-                miliseconds = (timeLeft%1000)/10 | 0;
-                seconds = ((timeLeft/1000) | 0) % 60;
-                minutes = ((timeLeft/60000) | 0) % 60;
-                hours = ((timeLeft/3600000) | 0) % 24;
-                days = (timeLeft/86400000) | 0;
-
-            },
-
-            show = function () {
-                
-                var content = pattern;
-
-                content = content.replace(/%HH/g, fullFormat(hours, 2));
-                content = content.replace(/%MM/g, fullFormat(minutes, 2));
-                content = content.replace(/%SS/g, fullFormat(seconds, 2));
-                content = content.replace(/%UU/g, fullFormat(miliseconds, 2));
-
-                content = content.replace(/%D/g, days);
-                content = content.replace(/%H/g, hours);
-                content = content.replace(/%M/g, minutes);
-                content = content.replace(/%S/g, seconds);
-                content = content.replace(/%U/g, miliseconds);
-              
-                node.innerHTML = content;
-            },
-
-            /* stop counting */
-            stop = function () {
-                clearInterval(timerId);
-                state = 'stopped';
-                settings.onStop && settings.onStop(ret);
-            },
-
-            /* end */
-            end = function () {
-                days = hours = minutes = seconds = miliseconds = 0;
-                show();
-                clearInterval(timerId);
-                state = 'ended';
-                settings.onEnd && settings.onEnd(ret);
-            },
-
-            /* reset exists only for timer mode, reset to original time */
-            reset = function () {
-                state = null;
-                timeLeft = limit;
-                count();
-                show();
-                stop();
-                settings.onReset && settings.onReset(ret);
-            };
-
-        /* public methods & properties */
-        var ret = {
+        
+        /*var ret = {
             getTimerId : getTimerId,
             getTime : getTime,
             getState : getState,
             start : start,
             stop : stop,
             setSpeed : setSpeed
-        };
+        };*/
 
-        if(mode === 'timer') {
+        /*if(mode === 'timer') {
             ret.reset = reset;
-        }
-
-        return ret;
+        }*/
     };
+
+    Countdown.prototype = {
+
+        getTimerId : function () { 
+            return this._timerId; 
+        },
+
+        getTime : function () {
+
+            return {
+                days : this._days,
+                hours : this._hours,
+                minutes : this._minutes,
+                seconds : this._seconds,
+                miliseconds : this._miliseconds
+            };
+
+        },
+
+        getState : function () {
+            return this._state;
+        },
+
+        setSpeed : function (val) {
+            this._speed = val;
+        },
+
+        /**
+         * Executed by setInterval
+         * @param timeStep number not required
+         */
+        _tick : function (timeStep) {
+
+            var elapsedTime = +new Date() - this._before,
+                tStep = typeof timeStep !== 'undefined' ? timeStep : this._refreshRate;
+
+            //fixing inactive tab time
+            if (this._inactiveTab && (elapsedTime > tStep + 10) ) {
+                this._timeLeft -= elapsedTime * this._speed;
+            } else {
+                this._timeLeft -= tStep * this._speed; 
+            }
+
+            if(this._timeLeft <= 0) {
+                this._end();
+                return;
+            }
+
+            this._count();
+            this._show();
+            
+            this._settings.onTick && this._settings.onTick(this);
+           
+            this._before = new Date();
+        },
+
+        /* start counting */
+        start : function () {
+
+            if (this._mode === 'date') {
+
+                this._startDate = this._settings.startDate || new Date();
+
+                this._timeLeft = this._endDate - this._startDate;
+
+            } else if (this._mode === 'timer') {
+
+                if (this._timeLeft === null) {
+                    this._timeLeft = this._limit;
+                }
+            }
+
+            this._before = new Date();
+
+            if(this._state === 'init'){
+                this._tick(0);
+            }
+
+            this._state = 'started';
+
+            var self = this;
+
+            this._timerId = setInterval(function(){
+                self._tick(this._refreshRate);
+            }, this._refreshRate);
+
+            this._settings.onStart && this._settings.onStart(this);
+
+            if(this._timeLeft <= 0){
+                this._end();
+            }
+        },
+
+        _count : function () {
+
+            this._miliseconds = (this._timeLeft%1000)/10 | 0;
+            this._seconds = ((this._timeLeft/1000) | 0) % 60;
+            this._minutes = ((this._timeLeft/60000) | 0) % 60;
+            this._hours = ((this._timeLeft/3600000) | 0) % 24;
+            this._days = (this._timeLeft/86400000) | 0;
+
+        },
+
+        _show : function () {
+            
+            var content = this._pattern;
+
+            content = content.replace(/%HH/g, fullFormat(this._hours, 2));
+            content = content.replace(/%MM/g, fullFormat(this._minutes, 2));
+            content = content.replace(/%SS/g, fullFormat(this._seconds, 2));
+            content = content.replace(/%UU/g, fullFormat(this._miliseconds, 2));
+
+            content = content.replace(/%D/g, this._days);
+            content = content.replace(/%H/g, this._hours);
+            content = content.replace(/%M/g, this._minutes);
+            content = content.replace(/%S/g, this._seconds);
+            content = content.replace(/%U/g, this._miliseconds);
+          
+            this._node.innerHTML = content;
+        },
+
+        /* stop counting */
+        stop : function () {
+            clearInterval(this._timerId);
+            this._state = 'stopped';
+            this._settings.onStop && this._settings.onStop(this);
+        },
+
+        /* end */
+        _end : function () {
+            this._days = this._hours = this._minutes = this._seconds = this._miliseconds = 0;
+            this._show();
+            clearInterval(this._timerId);
+            this._state = 'ended';
+            this._settings.onEnd && this._settings.onEnd(this);
+        },
+
+        /* reset exists only for timer mode, reset to original time */
+        reset : function () {
+
+            if(this._mode === 'date'){ return; }
+            
+            this._state = null;
+            this._timeLeft = this._limit;
+            this._count();
+            this._show();
+            this.stop();
+            this._settings.onReset && this._settings.onReset(this);
+        }
+    }
 
     return function (settings) {
         return new Countdown(settings);
