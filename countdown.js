@@ -58,8 +58,8 @@ var Countdown = (function () {
         this._timeLeft = null;
         /* time limit for timer mode */
         this._limit = 0;
-        /* step of interval */
-        this._refreshRate = 10;
+        /* step of interval, the more the better */
+        this._refreshRate = 50;
         /* speed ratio*/
         this._speed = 1;
         /* state */
@@ -70,6 +70,8 @@ var Countdown = (function () {
         this._before = null;
         /* initial settings */
         this._settings = settings;
+        /* loop flag */
+        this._stopLoop = false;
 
         /* private */
         var /* iteration var */
@@ -107,19 +109,6 @@ var Countdown = (function () {
         
         this._node = document.getElementById(settings.nodeId);
 
-        
-        /*var ret = {
-            getTimerId : getTimerId,
-            getTime : getTime,
-            getState : getState,
-            start : start,
-            stop : stop,
-            setSpeed : setSpeed
-        };*/
-
-        /*if(mode === 'timer') {
-            ret.reset = reset;
-        }*/
     };
 
     Countdown.prototype = {
@@ -194,18 +183,27 @@ var Countdown = (function () {
             }
 
             this._before = new Date();
-
-            if(this._state === 'init'){
-                this._tick(0);
-            }
-
             this._state = 'started';
 
             var self = this;
 
-            this._timerId = setInterval(function(){
-                self._tick(this._refreshRate);
-            }, this._refreshRate);
+            self._stopLoop = false;
+
+            if(this._state === 'init'){
+               this._tick(0);
+            }
+
+            var loop = function (refreshRate) {
+
+                setTimeout(function () {
+                    if (!self._stopLoop) {
+                        self._tick(refreshRate);
+                        loop(refreshRate);
+                    }
+                }, refreshRate);
+            };
+
+            loop(this._refreshRate);
 
             this._settings.onStart && this._settings.onStart(this);
 
@@ -244,7 +242,7 @@ var Countdown = (function () {
 
         /* stop counting */
         stop : function () {
-            clearInterval(this._timerId);
+            this._stopLoop = true;
             this._state = 'stopped';
             this._settings.onStop && this._settings.onStop(this);
         },
@@ -253,7 +251,7 @@ var Countdown = (function () {
         _end : function () {
             this._days = this._hours = this._minutes = this._seconds = this._miliseconds = 0;
             this._show();
-            clearInterval(this._timerId);
+            this._stopLoop = true;
             this._state = 'ended';
             this._settings.onEnd && this._settings.onEnd(this);
         },
