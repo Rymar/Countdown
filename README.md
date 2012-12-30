@@ -69,4 +69,4 @@ There is no type checking so be careful with types.
 - setSpeed(number) //you can adjust speed, make it faster or slower
  
 ### Example:
-http://jsfiddle.net/Rymar/H8fxU/
+http://jsfiddle.net/Rymar/H8fxU/2/
