@@ -197,8 +197,8 @@ var Countdown = (function () {
 
                 setTimeout(function () {
                     if (!self._stopLoop) {
-                        self._tick(refreshRate);
                         loop(refreshRate);
+                        self._tick(refreshRate);
                     }
                 }, refreshRate);
             };
