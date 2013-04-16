@@ -199,7 +199,8 @@ var Countdown = (function () {
                 }, refreshRate);
             };
 
-            loop(0);
+            loop(this._refreshRate);
+            this._tick(this._refreshRate);
 
             this._settings.onStart && this._settings.onStart(this);
 
