@@ -104,7 +104,7 @@
             mode : 'timer',
             nodeId : 'c1',
             limit : 10000,
-            refreshRate : 49,
+            refreshRate : 50,
             pattern : 'You have %MM:%SS.%UU to do something.',
             onEnd : function (ob) {
                 dojo.byId(this.nodeId).innerHTML = 'Time out, sry';
@@ -126,7 +126,7 @@
             nodeId : 'c2',
             refreshRate : 1000,
             pattern : 'End of year in %D days and %HH:%MM:%SS',
-            endDate : new Date(2013, 0, 1),
+            endDate : new Date(2014, 0, 1),
             onStart : function (ob) {
                 ob.setSpeed(speed);
                 var bt = dojo.byId('c2start');

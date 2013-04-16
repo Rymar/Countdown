@@ -143,16 +143,10 @@ var Countdown = (function () {
          */
         _tick : function (timeStep) {
 
-            var elapsedTime = +new Date() - this._before,
-                tStep = typeof timeStep !== 'undefined' ? timeStep : this._refreshRate;
+            var elapsedTime = +new Date() - this._before;
 
-            //fixing inactive tab time
-            if (this._inactiveTab && (elapsedTime > tStep + 10) ) {
-                this._timeLeft -= elapsedTime * this._speed;
-            } else {
-                this._timeLeft -= tStep * this._speed; 
-            }
-
+            this._timeLeft -= elapsedTime * this._speed;
+            
             if(this._timeLeft <= 0) {
                 this._end();
                 return;
@@ -193,6 +187,8 @@ var Countdown = (function () {
                this._tick(0);
             }
 
+            this.prev = +new Date();
+
             var loop = function (refreshRate) {
 
                 setTimeout(function () {
@@ -203,7 +199,7 @@ var Countdown = (function () {
                 }, refreshRate);
             };
 
-            loop(this._refreshRate);
+            loop(0);
 
             this._settings.onStart && this._settings.onStart(this);
 
