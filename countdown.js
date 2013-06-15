@@ -29,7 +29,7 @@ var Countdown = (function () {
     };
 
     var Countdown = function (settings) {
-        
+
         /* setInterval id */
         this._timerId = 0;
         /* days left */
@@ -207,7 +207,7 @@ var Countdown = (function () {
 
             this._miliseconds = (this._timeLeft%1000)/10 | 0;
             this._seconds = ((this._timeLeft/1000) | 0) % 60;
-            this._minutes = ((this._timeLeft/600000) | 0) % 60;
+            this._minutes = ((this._timeLeft/60000) | 0) % 60;
             this._hours = ((this._timeLeft/3600000) | 0) % 24;
             this._days = (this._timeLeft/86400000) | 0;
 
