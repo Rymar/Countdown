@@ -1,4 +1,4 @@
-It's a simple countdown class in JavaScript. What you can do with it? Basically there are two modes 'date' and 'timer'. First one will measure time between dates, second one, will measure time from some value in miliseconds to zero.
+It's a simple countdown module in JavaScript. What you can do with it? Basically there are two modes 'date' and 'timer'. First one will measure time between dates, second one measure time from some value in miliseconds to zero.
 
 ### Creating object:
 - 'timer' mode:
@@ -6,7 +6,7 @@ It's a simple countdown class in JavaScript. What you can do with it? Basically 
         var settings = {
             mode : 'timer', //required!!
             limit : number, //time limit in ms, required!!
-            pattern : string, //how should presentation of countdown look like, default 
+            pattern : string, //pattern format, default 
             //'%D days %HH hours %MM minutes %SS seconds %UU miliseconds'
     
             //%D - days from 0 to n
@@ -17,9 +17,9 @@ It's a simple countdown class in JavaScript. What you can do with it? Basically 
     
             //if something has double letter, it means that 0's will be put before, e.g. 12:04:02 instead of 12:4:2
     
-            nodeId : , //string, required, pattern will be placed in this node
+            nodeId : 'timer', //string, pattern will be placed in this node
             speed : 1, //default 1,
-            refreshRate, //number, default 100 ms, how often counter should be refreshed
+            refreshRate: 50, //number, default 50 ms, how often counter should be refreshed
             inactiveTab, //boolean, default true, should countdown work when tab is inactive
     
             //user events, and the first argument is current object
@@ -56,11 +56,11 @@ There is no type checking so be careful with types.
   returns object with current time 
 
         {
-            days : ,
-            hours : ,
-            minutes : ,
-            seconds : ,
-            miliseconds : ,
+            days : 1,
+            hours : 11,
+            minutes : 16,
+            seconds : 12,
+            miliseconds : 23,
         } 
 
 - start()

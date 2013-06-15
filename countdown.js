@@ -5,9 +5,9 @@
  * @version 0.1
  */
 
-'use strict';
-
 var Countdown = (function () {
+
+    'use strict';
 
     /**
      * Adding preceding zeros
@@ -29,9 +29,7 @@ var Countdown = (function () {
     };
 
     var Countdown = function (settings) {
-
-        /* pseudo private */
-
+        
         /* setInterval id */
         this._timerId = 0;
         /* days left */
@@ -48,11 +46,11 @@ var Countdown = (function () {
         this._startDate = null;
         /* end date Object */
         this._endDate = null;
-        /* how the date will be showed on page */
+        /* how the date will be shown on page */
         this._pattern = '%D days %HH hours %MM minutes %SS seconds %UU miliseconds';
-        /* mode of countdown: 'date' or 'timer' */ /*REQUIRED!!*/
+        /* mode of countdown: 'date' or 'timer' */
         this._mode = '';
-        /* element where remaining time will be placed */ /*REQUIRED!!*/
+        /* element where remaining time will be placed */
         this._node = null;
         /* in seconds or miliseconds, depends on settings */
         this._timeLeft = null;
@@ -64,8 +62,6 @@ var Countdown = (function () {
         this._speed = 1;
         /* state */
         this._state = 'init';
-        /* inactiveTab */
-        this._inactiveTab = true;
         /* date before changing tab */
         this._before = null;
         /* initial settings */
@@ -79,7 +75,7 @@ var Countdown = (function () {
             /* required settings */
             required;
 
-        required = settings.mode === 'date' ? ['mode', 'endDate', 'nodeId'] : ['mode', 'limit', 'nodeId'];
+        required = settings.mode === 'date' ? ['mode', 'endDate'] : ['mode', 'limit'];
 
         /* check required fields */
         for ( ; i < required.length ; i++) {
@@ -94,8 +90,6 @@ var Countdown = (function () {
         /* initialization */
 
         this._mode = settings.mode;
-
-        this._inactiveTab = settings.inactiveTab || true;
 
         this._speed = settings.speed || 1;
 
@@ -193,8 +187,8 @@ var Countdown = (function () {
 
                 setTimeout(function () {
                     if (!self._stopLoop) {
-                        loop(refreshRate);
                         self._tick(refreshRate);
+                        loop(refreshRate);
                     }
                 }, refreshRate);
             };
@@ -213,13 +207,15 @@ var Countdown = (function () {
 
             this._miliseconds = (this._timeLeft%1000)/10 | 0;
             this._seconds = ((this._timeLeft/1000) | 0) % 60;
-            this._minutes = ((this._timeLeft/60000) | 0) % 60;
+            this._minutes = ((this._timeLeft/600000) | 0) % 60;
             this._hours = ((this._timeLeft/3600000) | 0) % 24;
             this._days = (this._timeLeft/86400000) | 0;
 
         },
 
         _show : function () {
+
+            if (!this._node) { return; }
             
             var content = this._pattern;
 
